@@ -162,13 +162,16 @@ def read_from_arduino():
         return
     while True:
         try:
-            line = arduino.readline().decode("utf-8").strip()
-            if line:
-                print(f"📡 Arduino says: {line}")
+            raw_line = arduino.readline()
+            if raw_line:
+                # Safely decode: ignore or replace bad bytes
+                line = raw_line.decode("utf-8", errors="ignore").strip()
+                if line:
+                    print(f"📡 Arduino says: {line}")
         except Exception as e:
             print("⚠️ Serial read error:", e)
             break
-        time.sleep(0.05)  # prevent CPU overuse
+        time.sleep(0.05)
 
 
 # Start background thread
@@ -177,7 +180,7 @@ if arduino:
     thread.start()
 
 
-    
+
 @app.route('/run', methods=['POST'])
 def run_program():
     try:
