@@ -125,27 +125,27 @@ joystick_state = {
 def joystick():
     global joystick_state
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
 
-        # Update only the provided axes
+        # Update state
         for key in data:
             if key in joystick_state:
                 joystick_state[key] = float(data[key])
 
-        # Convert normalized (-1..1) joystick inputs to flight commands
+        # Apply conversions
         roll = joystick_state["roll"] * 45
         pitch = joystick_state["pitch"] * 45
         yaw = joystick_state["yaw"] * 45
-        throttle = 1000 + ((joystick_state["throttle"] + 1) * 500)  # → 1000–2000 μs
 
-        # Print readable output
+        # Invert throttle so up = higher value
+        throttle_input = -joystick_state["throttle"]
+        throttle = 1000 + ((throttle_input + 1) * 500)  # 1000–2000 µs
+
         print(
-            f"🎮 Joystick update | "
-            f"ROLL={roll:+.2f}° | PITCH={pitch:+.2f}° | YAW={yaw:+.2f}° | "
-            f"THROTTLE(raw)={joystick_state['throttle']:+.2f} → (μs)={throttle:.0f}"
+            f"🎮 Joystick | ROLL={roll:+.2f}° | PITCH={pitch:+.2f}° | "
+            f"YAW={yaw:+.2f}° | THROTTLE(raw)={throttle_input:+.2f} → {throttle:.0f} μs"
         )
 
-        # Send compact serial command to Arduino
         if arduino:
             command = f"CMD,{roll:.2f},{pitch:.2f},{throttle:.0f},{yaw:.2f}\n"
             arduino.write(command.encode("utf-8"))
@@ -154,6 +154,30 @@ def joystick():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+
+# 🧠 Background thread to read serial data
+def read_from_arduino():
+    if not arduino:
+        return
+    while True:
+        try:
+            line = arduino.readline().decode("utf-8").strip()
+            if line:
+                print(f"📡 Arduino says: {line}")
+        except Exception as e:
+            print("⚠️ Serial read error:", e)
+            break
+        time.sleep(0.05)  # prevent CPU overuse
+
+
+# Start background thread
+if arduino:
+    thread = threading.Thread(target=read_from_arduino, daemon=True)
+    thread.start()
+
+
+    
 @app.route('/run', methods=['POST'])
 def run_program():
     try:
