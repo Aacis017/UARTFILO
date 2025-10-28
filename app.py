@@ -164,14 +164,19 @@ def read_from_arduino():
         try:
             raw_line = arduino.readline()
             if raw_line:
-                # Safely decode: ignore or replace bad bytes
                 line = raw_line.decode("utf-8", errors="ignore").strip()
                 if line:
-                    print(f"📡 Arduino says: {line}")
+                    if line.startswith("ACK,"):
+                        print(f"✅ Received ACK: {line}")
+                    elif line.startswith("R:"):
+                        print(f"📡 Telemetry: {line}")
+                    else:
+                        print(f"⚠️ Unknown line: {line}")
         except Exception as e:
             print("⚠️ Serial read error:", e)
             break
         time.sleep(0.05)
+
 
 
 # Start background thread
