@@ -65,7 +65,7 @@ function sendCommand(command) {
 }
 
 
-/ Arm / Disarm buttons
+
 const armButton = document.getElementById('arm-button');
 const disarmButton = document.getElementById('disarm-button');
 const armedStatus = document.getElementById('armed-status');
