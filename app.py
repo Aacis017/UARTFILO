@@ -2,7 +2,7 @@ from flask import Flask, Response, render_template, request, jsonify
 import io, os, json, time, threading, serial, platform
 
 app = Flask(__name__)
-
+armed = False
 # -------------------------
 # Arduino serial setup
 # -------------------------
@@ -113,8 +113,11 @@ joystick_state = {
 
 @app.route('/joystick', methods=['POST'])
 def joystick():
-    global joystick_state
+    global joystick_state, armed
     try:
+        if not armed:
+            return jsonify({"status": "error", "message": "Motors are disarmed"}), 403
+
         data = request.get_json(force=True)
 
         # Update state
@@ -126,10 +129,8 @@ def joystick():
         roll = joystick_state["roll"] * 45
         pitch = joystick_state["pitch"] * 45
         yaw = joystick_state["yaw"] * 45
-
-        # Invert throttle so up = higher value
         throttle_input = -joystick_state["throttle"]
-        throttle = 1000 + ((throttle_input + 1) * 500)  # 1000–2000 µs
+        throttle = 1000 + ((throttle_input + 1) * 500)
 
         print(
             f"🎮 Joystick | ROLL={roll:+.2f}° | PITCH={pitch:+.2f}° | "
@@ -143,6 +144,23 @@ def joystick():
         return jsonify({"status": "ok", "sent": {"roll": roll, "pitch": pitch, "yaw": yaw, "throttle": throttle}})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/arm', methods=['POST'])
+def arm():
+    global armed
+    armed = True
+    if arduino:
+        arduino.write(b"a\n")  # Sends 'a' command to Arduino
+    return jsonify({"status": "ok", "message": "Motors ARMED"})
+
+@app.route('/disarm', methods=['POST'])
+def disarm():
+    global armed
+    armed = False
+    if arduino:
+        arduino.write(b"d\n")  # Sends 'd' command to Arduino
+    return jsonify({"status": "ok", "message": "Motors DISARMED"})
 
 
 

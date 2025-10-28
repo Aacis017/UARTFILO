@@ -11,12 +11,14 @@
     <div class="top-bar">
         <a href="/" class="back-button"><i class="fas fa-arrow-left"></i> Back to Blockly</a>
     </div>
+
     <div class="video-container">
         <img src="{{ url_for('video_feed') }}" width="100%">
     </div>
 
     <div class="control-container">
         <div id="joystick-left" class="joystick-zone"></div>
+
         <div class="telemetry">
             <div class="telemetry-item">
                 <i class="fas fa-battery-full"></i>
@@ -30,18 +32,17 @@
                 <i class="fas fa-tachometer-alt"></i>
                 <span id="speed">--km/h</span>
             </div>
-
-            <div class="te">
-     <span id="throttle-display">1000</span> μs
-</div>
+            <div class="telemetry-item">
+                <span id="throttle-display">1000</span> μs
+            </div>
+            <div class="telemetry-item">
+                <button id="arm-button" class="arm-btn">ARM</button>
+                <button id="disarm-button" class="disarm-btn">DISARM</button>
+                <span id="armed-status">DISARMED</span>
+            </div>
         </div>
-        <div id="joystick-right" class="joystick-zone"></div>
-    </div>
 
-    <div class="flight-controls">
-        <button id="takeoff-button">Takeoff</button>
-        <button id="land-button">Land</button>
-        <button id="return-home-button">Return to Home</button>
+        <div id="joystick-right" class="joystick-zone"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>

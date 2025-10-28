@@ -35,21 +35,7 @@ joystickRight.on('move', (evt, data) => {
     const r = data.vector.x;
     sendCommand({ pitch: p, roll: r });
 });
-    // Buttons
-    document.getElementById('takeoff-button').addEventListener('click', () => {
-        console.log('Takeoff button pressed');
-        sendCommand({ action: 'takeoff' });
-    });
 
-    document.getElementById('land-button').addEventListener('click', () => {
-        console.log('Land button pressed');
-        sendCommand({ action: 'land' });
-    });
-
-    document.getElementById('return-home-button').addEventListener('click', () => {
-        console.log('Return to Home button pressed');
-        sendCommand({ action: 'return_home' });
-    });
 
     // Dummy telemetry updates
     setInterval(() => {
@@ -77,5 +63,33 @@ function sendCommand(command) {
     })
     .catch(err => console.error('Send failed:', err));
 }
+
+
+/ Arm / Disarm buttons
+const armButton = document.getElementById('arm-button');
+const disarmButton = document.getElementById('disarm-button');
+const armedStatus = document.getElementById('armed-status');
+
+armButton.addEventListener('click', () => {
+    fetch('/arm', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            armedStatus.innerText = "ARMED";
+            armedStatus.style.color = "green";
+        }
+    });
+});
+
+disarmButton.addEventListener('click', () => {
+    fetch('/disarm', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            armedStatus.innerText = "DISARMED";
+            armedStatus.style.color = "red";
+        }
+    });
+});
 
 });
