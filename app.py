@@ -108,16 +108,6 @@ joystick_state = {
     "roll": 0.0,
     "pitch": 0.0,
     "yaw": 0.0,
-    "throttle": 1000.0
-}
-
-# -------------------------
-# Joystick state cache
-# -------------------------
-joystick_state = {
-    "roll": 0.0,
-    "pitch": 0.0,
-    "yaw": 0.0,
     "throttle": -1.0  # Start at lowest position
 }
 
